@@ -23,18 +23,16 @@ library(R.matlab)
 
 path <- "/home/ntyet/Downloads/Dog_1"
 Dogid <- 1
-segmentid <- "0002"
-state <- "_interictal"
-state <- "_preictal"
-state <- "_test"
-filename <- paste("Dog_", Dogid, state, "_segment_", segmentid, ".mat", sep = "")
-pathname <- file.path(path, filename)
-data <- readMat(pathname)
-print(data)
-str(data)
-str(data$interictal.segment.1)
-str(data$interictal.segment.1[[1]])
-400*600
-dim(data[[1]][[1]])
-data[[1]][[3]] *data[[1]][[2]] 
-data[[1]][[1]][,11:15]
+par(mfrow = c(3,3))
+for (i in 1:9){
+  segmentid <- paste("000", i, sep = "")
+  state <- "_interictal"
+  #state <- "_preictal"
+  # state <- "_test"
+  filename <- paste("Dog_", Dogid, state, "_segment_", segmentid, ".mat", sep = "")
+  pathname <- file.path(path, filename)
+  data <- readMat(pathname)
+  
+  hist(data[[1]][[1]][1, ], nclass = 100, freq = T)
+  
+}
