@@ -2,14 +2,13 @@ require(R.matlab)
 require(plyr)
 require(ggplot2)
 require(reshape2)
-require(shiny)
-require(MASS)
 library(tseries)
 #-- Data is stored in 
 
 get.seizure.file = function(dog.type,dog.count,seizure.type,file.count){
-   data.dir = '/run/user/1000/gvfs/smb-share:server=researchfiles.iastate.edu,share=las$/STAT/KaggleDataComp/data/raw_data/'
+   #data.dir = '/run/user/1000/gvfs/smb-share:server=researchfiles.iastate.edu,share=las$/STAT/KaggleDataComp/data/raw_data/'
    #data.dir = '/media/yet/DATA/seizure'
+  data.dir <- "K:/data/raw_data/"
    data.file.gen = c('_interictal_segment_', '_preictal_segment_','_test_segment_')
    data.folder = paste(dog.type,dog.count,sep='_')
    files = list.files(paste(data.dir,data.folder,sep=''))
