@@ -22,9 +22,13 @@ require(MASS)
 
 #-- Data is stored in 
 
-
+dog.type = "Dog"
+dog.count = 1
+#seizure.type = "preictal"
+seizure.type = "test"
+seizure.type = "interictal"
 get.seizure.file = function(dog.type,dog.count,seizure.type,file.count){
-   data.dir = '/Volumes/KaggleDataComp/data/raw_data/'
+   data.dir = '/run/user/1000/gvfs/smb-share:server=researchfiles.iastate.edu,share=las$/STAT/KaggleDataComp/data/raw_data/'
    data.file.gen = c('_interictal_segment_', '_preictal_segment_','_test_segment_')
    data.folder = paste(dog.type,dog.count,sep='_')
    files = list.files(paste(data.dir,data.folder,sep=''))
@@ -43,7 +47,7 @@ get.seizure.file = function(dog.type,dog.count,seizure.type,file.count){
 }
 
 d.mat1 = get.seizure.file('Dog',1,'preictal',2)
-d.mat2 = get.seizure.file('Dog',4,'preictal',2)
+d.mat2 = get.seizure.file('Dog',1,'interictal',2)
 d.mat3 = get.seizure.file('Dog',4,'interictal',105)
 
 unlist(d.mat1[[1]][[4]])
@@ -53,14 +57,14 @@ unlist(d.mat3[[1]][[4]])
 
 d.mat[[1]][[3]]
 
-str(d.mat)
+str(d.mat1)
 
-d = data.frame(t(d.mat[[1]][[1]]))
+d = data.frame(t(d.mat1[[1]][[1]]))
 names(d) = paste('ch',1:16,sep='')
 d$t = 600*(1:nrow(d)/nrow(d))
 
-p1 = ggplot()+geom_line(data=d[1:1000,],aes(t,ch1))
-p2 = ggplot()+geom_line(data=d,aes(t,abs(ch2)))
+p1 = ggplot()+geom_line(data=d[,],aes(t,ch1))
+p2 = ggplot()+geom_line(data=d,aes(t,abs(ch1)))
 p3 = ggplot()+geom_line(data=d,aes(t,ch3))
 p4 = ggplot()+geom_line(data=d,aes(t,ch4))
 p5 = ggplot()+geom_line(data=d,aes(t,ch5))
@@ -96,8 +100,8 @@ d.melt = melt(d.use, id.vars = 'ch', measure.vars = names(d.use)[2:ncol(d.use)])
 head(d.melt)
 
 require(tseries)
-
-
+install.packages("tseries")
+library(tseries)
 str(d.mat)
 
 p1 = qplot(1:ncol(d),d[1,],geom='line')
