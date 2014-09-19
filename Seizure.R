@@ -91,7 +91,6 @@ for(j in 1:n_segment[i_seizure]){
 proc.time()-pm1
 write.csv(dog2_preictal_1_42_ar6_ar7, file = "dog2_preictal_1_42_ar6_ar7.csv", row.names = FALSE)
 
-#dog2_preictal_1_42_ar6_ar7 <- dog2_out1
 write.csv(dog2_preictal_1_42_ar6_ar7, file = "K:/Yet/output/dog2_preictal_1_42_ar6_ar7.csv", row.names = FALSE)
 
 #### seizure = 2 interictal 1- 250######
