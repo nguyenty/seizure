@@ -5,6 +5,7 @@ require(reshape2)
 library(reshape)
 #install.packages("FitAR")
 library(FitAR)
+#install.packages("randomForest")
 library(randomForest)
 #-- Data is stored in 
 # dog.type <- "Patient"
@@ -413,22 +414,22 @@ for(i_seizure in 1){ # i_seizure <- 1
     n_channel <- nrow(dat_mat)
     res <- ldply(1:n_channel, function(i){ # i <- 5
       
-      Dog.stats <- c(mean(dat_mat[i,]),
+      Dog.stats <- c(quantile(dat_mat[i,], probs = c(0, .25, .5, .75, 1)),
                      sd(dat_mat[i,]),
-                     max(dat_mat[i,]),
-                     min(dat_mat[i,]),
-                     median(dat_mat[i,]))
+                     mean(dat_mat[i,]),
+                     pacf(dat_mat[i,], plot = F)$acf[1:7])
       
       d.fit7 <- FitAR(dat_mat[i,], 7)
       d.fit6 <- FitAR(dat_mat[i,], 6)  
       
-      AIC6.stats = c(d.fit6$muHat, d.fit6$phiHat, d.fit6$sigsqHat, 2*7 - 2*d.fit6$loglikelihood)
-      AIC7.stats = c(d.fit7$muHat, d.fit7$phiHat, d.fit7$sigsqHat, 2*8 - 2*d.fit7$loglikelihood)
+      AIC6.stats = c(d.fit6$muHat, d.fit6$phiHat, d.fit6$sigsqHat, 2*6 - 2*d.fit6$loglikelihood)
+      AIC7.stats = c(d.fit7$muHat, d.fit7$phiHat, d.fit7$sigsqHat, 2*7 - 2*d.fit7$loglikelihood)
       
-      out <- c(Patient = 1, Seizure = seizure[i_seizure], File = j, Channel = i, 
+      out <- c(patient = 2, seizure = seizure[i_seizure], segment = j, channel = i, 
                Dog.stats,AIC6.stats,AIC7.stats)
-      names(out)  <- c("Patient", "Seizure", "File", "Channel",  
-                       "mean", "sd", "max","min", "median", "ar6_mu",
+      names(out)  <- c("patient", "seizure", "segment", "channel",  "0_quantile","25_quantile", "50_quantile",
+                       "75_quantile", "100_quantile", 
+                       "mean", "sd", paste("pacf_", 1:7, sep = ""), "ar6_mu",
                        paste("ar", 6,"_ar", 1:6, sep = ""),
                        "ar6_sigma2", "ar6_aic", "ar7_mu",
                        paste("ar", 7,"_ar", 1:7, sep = ""),
@@ -451,13 +452,6 @@ write.csv(patient2_preictal_1_18_ar6_ar7, file = "K:/Yet/output/patient2_preicta
 
 #####Patien2_ seizure = 2 interictal 1- 21#####
 ## Patient 2 interictal 42 preictal 18 test 150###
-
-n_segment <- c(18, 42, 150)
-seizure <- c("preictal", "interictal", "test")
-type <- c("Dog", "Patient")
-i_type <- c(1:2)
-i_dog <- c(1,2,3,4,5)
-i_patient <- c(1,2)
 patient2_interictal_1_21_ar6_ar7 <- data.frame(Date=as.Date(character()),
                                              File=character(), 
                                              User=character(), 
@@ -472,22 +466,21 @@ for(i_seizure in 2){ # i_seizure <- 1
     n_channel <- nrow(dat_mat)
     res <- ldply(1:n_channel, function(i){ # i <- 1
       
-      Dog.stats <- c(mean(dat_mat[i,]),
+      Dog.stats <- c(quantile(dat_mat[i,], probs = c(0, .25, .5, .75, 1)),
                      sd(dat_mat[i,]),
-                     max(dat_mat[i,]),
-                     min(dat_mat[i,]),
-                     median(dat_mat[i,]))
+                     mean(dat_mat[i,]),
+                     pacf(dat_mat[i,], plot = F)$acf[1:7])
       
       d.fit7 <- FitAR(dat_mat[i,], 7)
       d.fit6 <- FitAR(dat_mat[i,], 6)  
+      AIC6.stats = c(d.fit6$muHat, d.fit6$phiHat, d.fit6$sigsqHat, 2*6 - 2*d.fit6$loglikelihood)
+      AIC7.stats = c(d.fit7$muHat, d.fit7$phiHat, d.fit7$sigsqHat, 2*7 - 2*d.fit7$loglikelihood)
       
-      AIC6.stats = c(d.fit6$muHat, d.fit6$phiHat, d.fit6$sigsqHat, 2*7 - 2*d.fit6$loglikelihood)
-      AIC7.stats = c(d.fit7$muHat, d.fit7$phiHat, d.fit7$sigsqHat, 2*8 - 2*d.fit7$loglikelihood)
-      
-      out <- c(Patient = 1, Seizure = seizure[i_seizure], File = j, Channel = i, 
+      out <- c(patient = 2, seizure = seizure[i_seizure], segment = j, channel = i, 
                Dog.stats,AIC6.stats,AIC7.stats)
-      names(out)  <- c("Patient", "Seizure", "File", "Channel",  
-                       "mean", "sd", "max","min", "median", "ar6_mu",
+      names(out)  <- c("patient", "seizure", "segment", "channel",  "0_quantile","25_quantile", "50_quantile",
+                       "75_quantile", "100_quantile", 
+                       "mean", "sd", paste("pacf_", 1:7, sep = ""), "ar6_mu",
                        paste("ar", 6,"_ar", 1:6, sep = ""),
                        "ar6_sigma2", "ar6_aic", "ar7_mu",
                        paste("ar", 7,"_ar", 1:7, sep = ""),
@@ -516,12 +509,6 @@ patient2_interictal_22_42_ar6_ar7 <- data.frame(Date=as.Date(character()),
                                                User=character(), 
                                                stringsAsFactors=FALSE) 
 
-n_segment <- c(18, 42, 150)
-seizure <- c("preictal", "interictal", "test")
-type <- c("Dog", "Patient")
-i_type <- c(1:2)
-i_dog <- c(1,2,3,4,5)
-i_patient <- c(1,2)
 pm1 <- proc.time()
 for(i_seizure in 2){ # i_seizure <- 1
   for(j in 22:42){
@@ -531,22 +518,21 @@ for(i_seizure in 2){ # i_seizure <- 1
     n_channel <- nrow(dat_mat)
     res <- ldply(1:n_channel, function(i){ # i <- 1
       
-      Dog.stats <- c(mean(dat_mat[i,]),
+      Dog.stats <- c(quantile(dat_mat[i,], probs = c(0, .25, .5, .75, 1)),
                      sd(dat_mat[i,]),
-                     max(dat_mat[i,]),
-                     min(dat_mat[i,]),
-                     median(dat_mat[i,]))
+                     mean(dat_mat[i,]),
+                     pacf(dat_mat[i,], plot = F)$acf[1:7])
       
       d.fit7 <- FitAR(dat_mat[i,], 7)
       d.fit6 <- FitAR(dat_mat[i,], 6)  
+      AIC6.stats = c(d.fit6$muHat, d.fit6$phiHat, d.fit6$sigsqHat, 2*6 - 2*d.fit6$loglikelihood)
+      AIC7.stats = c(d.fit7$muHat, d.fit7$phiHat, d.fit7$sigsqHat, 2*7 - 2*d.fit7$loglikelihood)
       
-      AIC6.stats = c(d.fit6$muHat, d.fit6$phiHat, d.fit6$sigsqHat, 2*7 - 2*d.fit6$loglikelihood)
-      AIC7.stats = c(d.fit7$muHat, d.fit7$phiHat, d.fit7$sigsqHat, 2*8 - 2*d.fit7$loglikelihood)
-      
-      out <- c(Patient = 1, Seizure = seizure[i_seizure], File = j, Channel = i, 
+      out <- c(patient = 2, seizure = seizure[i_seizure], segment = j, channel = i, 
                Dog.stats,AIC6.stats,AIC7.stats)
-      names(out)  <- c("Patient", "Seizure", "File", "Channel",  
-                       "mean", "sd", "max","min", "median", "ar6_mu",
+      names(out)  <- c("patient", "seizure", "segment", "channel",  "0_quantile","25_quantile", "50_quantile",
+                       "75_quantile", "100_quantile", 
+                       "mean", "sd", paste("pacf_", 1:7, sep = ""), "ar6_mu",
                        paste("ar", 6,"_ar", 1:6, sep = ""),
                        "ar6_sigma2", "ar6_aic", "ar7_mu",
                        paste("ar", 7,"_ar", 1:7, sep = ""),
@@ -575,12 +561,6 @@ patient2_test_1_30_ar6_ar7 <- data.frame(Date=as.Date(character()),
                                                 User=character(), 
                                                 stringsAsFactors=FALSE) 
 
-n_segment <- c(18, 42, 150)
-seizure <- c("preictal", "interictal", "test")
-type <- c("Dog", "Patient")
-i_type <- c(1:2)
-i_dog <- c(1,2,3,4,5)
-i_patient <- c(1,2)
 pm1 <- proc.time()
 for(i_seizure in 3){ # i_seizure <- 1
   for(j in 1:30){
@@ -590,22 +570,21 @@ for(i_seizure in 3){ # i_seizure <- 1
     n_channel <- nrow(dat_mat)
     res <- ldply(1:n_channel, function(i){ # i <- 1
       
-      Dog.stats <- c(mean(dat_mat[i,]),
+      Dog.stats <- c(quantile(dat_mat[i,], probs = c(0, .25, .5, .75, 1)),
                      sd(dat_mat[i,]),
-                     max(dat_mat[i,]),
-                     min(dat_mat[i,]),
-                     median(dat_mat[i,]))
+                     mean(dat_mat[i,]),
+                     pacf(dat_mat[i,], plot = F)$acf[1:7])
       
       d.fit7 <- FitAR(dat_mat[i,], 7)
       d.fit6 <- FitAR(dat_mat[i,], 6)  
+      AIC6.stats = c(d.fit6$muHat, d.fit6$phiHat, d.fit6$sigsqHat, 2*6 - 2*d.fit6$loglikelihood)
+      AIC7.stats = c(d.fit7$muHat, d.fit7$phiHat, d.fit7$sigsqHat, 2*7 - 2*d.fit7$loglikelihood)
       
-      AIC6.stats = c(d.fit6$muHat, d.fit6$phiHat, d.fit6$sigsqHat, 2*7 - 2*d.fit6$loglikelihood)
-      AIC7.stats = c(d.fit7$muHat, d.fit7$phiHat, d.fit7$sigsqHat, 2*8 - 2*d.fit7$loglikelihood)
-      
-      out <- c(Patient = 1, Seizure = seizure[i_seizure], File = j, Channel = i, 
+      out <- c(patient = 2, seizure = seizure[i_seizure], segment = j, channel = i, 
                Dog.stats,AIC6.stats,AIC7.stats)
-      names(out)  <- c("Patient", "Seizure", "File", "Channel",  
-                       "mean", "sd", "max","min", "median", "ar6_mu",
+      names(out)  <- c("patient", "seizure", "segment", "channel",  "0_quantile","25_quantile", "50_quantile",
+                       "75_quantile", "100_quantile", 
+                       "mean", "sd", paste("pacf_", 1:7, sep = ""), "ar6_mu",
                        paste("ar", 6,"_ar", 1:6, sep = ""),
                        "ar6_sigma2", "ar6_aic", "ar7_mu",
                        paste("ar", 7,"_ar", 1:7, sep = ""),
@@ -633,12 +612,6 @@ patient2_test_31_60_ar6_ar7 <- data.frame(Date=as.Date(character()),
                                          User=character(), 
                                          stringsAsFactors=FALSE) 
 
-n_segment <- c(18, 42, 150)
-seizure <- c("preictal", "interictal", "test")
-type <- c("Dog", "Patient")
-i_type <- c(1:2)
-i_dog <- c(1,2,3,4,5)
-i_patient <- c(1,2)
 pm1 <- proc.time()
 for(i_seizure in 3){ # i_seizure <- 1
   for(j in 31:60){
@@ -648,22 +621,21 @@ for(i_seizure in 3){ # i_seizure <- 1
     n_channel <- nrow(dat_mat)
     res <- ldply(1:n_channel, function(i){ # i <- 1
       
-      Dog.stats <- c(mean(dat_mat[i,]),
+      Dog.stats <- c(quantile(dat_mat[i,], probs = c(0, .25, .5, .75, 1)),
                      sd(dat_mat[i,]),
-                     max(dat_mat[i,]),
-                     min(dat_mat[i,]),
-                     median(dat_mat[i,]))
+                     mean(dat_mat[i,]),
+                     pacf(dat_mat[i,], plot = F)$acf[1:7])
       
       d.fit7 <- FitAR(dat_mat[i,], 7)
       d.fit6 <- FitAR(dat_mat[i,], 6)  
+      AIC6.stats = c(d.fit6$muHat, d.fit6$phiHat, d.fit6$sigsqHat, 2*6 - 2*d.fit6$loglikelihood)
+      AIC7.stats = c(d.fit7$muHat, d.fit7$phiHat, d.fit7$sigsqHat, 2*7 - 2*d.fit7$loglikelihood)
       
-      AIC6.stats = c(d.fit6$muHat, d.fit6$phiHat, d.fit6$sigsqHat, 2*7 - 2*d.fit6$loglikelihood)
-      AIC7.stats = c(d.fit7$muHat, d.fit7$phiHat, d.fit7$sigsqHat, 2*8 - 2*d.fit7$loglikelihood)
-      
-      out <- c(Patient = 1, Seizure = seizure[i_seizure], File = j, Channel = i, 
+      out <- c(patient = 2, seizure = seizure[i_seizure], segment = j, channel = i, 
                Dog.stats,AIC6.stats,AIC7.stats)
-      names(out)  <- c("Patient", "Seizure", "File", "Channel",  
-                       "mean", "sd", "max","min", "median", "ar6_mu",
+      names(out)  <- c("patient", "seizure", "segment", "channel",  "0_quantile","25_quantile", "50_quantile",
+                       "75_quantile", "100_quantile", 
+                       "mean", "sd", paste("pacf_", 1:7, sep = ""), "ar6_mu",
                        paste("ar", 6,"_ar", 1:6, sep = ""),
                        "ar6_sigma2", "ar6_aic", "ar7_mu",
                        paste("ar", 7,"_ar", 1:7, sep = ""),
@@ -692,14 +664,6 @@ patient2_test_61_90_ar6_ar7 <- data.frame(Date=as.Date(character()),
                                           User=character(), 
                                           stringsAsFactors=FALSE) 
 
-n_segment <- c(18, 42, 150)
-seizure <- c("preictal", "interictal", "test")
-type <- c("Dog", "Patient")
-i_type <- c(1:2)
-i_dog <- c(1,2,3,4,5)
-i_patient <- c(1,2)
-
-
 pm1 <- proc.time()
 for(i_seizure in 3){ # i_seizure <- 1
   for(j in 61:90){
@@ -709,22 +673,21 @@ for(i_seizure in 3){ # i_seizure <- 1
     n_channel <- nrow(dat_mat)
     res <- ldply(1:n_channel, function(i){ # i <- 1
       
-      Dog.stats <- c(mean(dat_mat[i,]),
+      Dog.stats <- c(quantile(dat_mat[i,], probs = c(0, .25, .5, .75, 1)),
                      sd(dat_mat[i,]),
-                     max(dat_mat[i,]),
-                     min(dat_mat[i,]),
-                     median(dat_mat[i,]))
+                     mean(dat_mat[i,]),
+                     pacf(dat_mat[i,], plot = F)$acf[1:7])
       
       d.fit7 <- FitAR(dat_mat[i,], 7)
       d.fit6 <- FitAR(dat_mat[i,], 6)  
+      AIC6.stats = c(d.fit6$muHat, d.fit6$phiHat, d.fit6$sigsqHat, 2*6 - 2*d.fit6$loglikelihood)
+      AIC7.stats = c(d.fit7$muHat, d.fit7$phiHat, d.fit7$sigsqHat, 2*7 - 2*d.fit7$loglikelihood)
       
-      AIC6.stats = c(d.fit6$muHat, d.fit6$phiHat, d.fit6$sigsqHat, 2*7 - 2*d.fit6$loglikelihood)
-      AIC7.stats = c(d.fit7$muHat, d.fit7$phiHat, d.fit7$sigsqHat, 2*8 - 2*d.fit7$loglikelihood)
-      
-      out <- c(Patient = 1, Seizure = seizure[i_seizure], File = j, Channel = i, 
+      out <- c(patient = 2, seizure = seizure[i_seizure], segment = j, channel = i, 
                Dog.stats,AIC6.stats,AIC7.stats)
-      names(out)  <- c("Patient", "Seizure", "File", "Channel",  
-                       "mean", "sd", "max","min", "median", "ar6_mu",
+      names(out)  <- c("patient", "seizure", "segment", "channel",  "0_quantile","25_quantile", "50_quantile",
+                       "75_quantile", "100_quantile", 
+                       "mean", "sd", paste("pacf_", 1:7, sep = ""), "ar6_mu",
                        paste("ar", 6,"_ar", 1:6, sep = ""),
                        "ar6_sigma2", "ar6_aic", "ar7_mu",
                        paste("ar", 7,"_ar", 1:7, sep = ""),
@@ -753,13 +716,6 @@ patient2_test_91_120_ar6_ar7 <- data.frame(Date=as.Date(character()),
                                           User=character(), 
                                           stringsAsFactors=FALSE) 
 
-n_segment <- c(18, 42, 150)
-seizure <- c("preictal", "interictal", "test")
-type <- c("Dog", "Patient")
-i_type <- c(1:2)
-i_dog <- c(1,2,3,4,5)
-i_patient <- c(1,2)
-
 pm1 <- proc.time()
 for(i_seizure in 3){ # i_seizure <- 1
   for(j in 91:120){
@@ -769,22 +725,21 @@ for(i_seizure in 3){ # i_seizure <- 1
     n_channel <- nrow(dat_mat)
     res <- ldply(1:n_channel, function(i){ # i <- 1
       
-      Dog.stats <- c(mean(dat_mat[i,]),
+      Dog.stats <- c(quantile(dat_mat[i,], probs = c(0, .25, .5, .75, 1)),
                      sd(dat_mat[i,]),
-                     max(dat_mat[i,]),
-                     min(dat_mat[i,]),
-                     median(dat_mat[i,]))
+                     mean(dat_mat[i,]),
+                     pacf(dat_mat[i,], plot = F)$acf[1:7])
       
       d.fit7 <- FitAR(dat_mat[i,], 7)
       d.fit6 <- FitAR(dat_mat[i,], 6)  
+      AIC6.stats = c(d.fit6$muHat, d.fit6$phiHat, d.fit6$sigsqHat, 2*6 - 2*d.fit6$loglikelihood)
+      AIC7.stats = c(d.fit7$muHat, d.fit7$phiHat, d.fit7$sigsqHat, 2*7 - 2*d.fit7$loglikelihood)
       
-      AIC6.stats = c(d.fit6$muHat, d.fit6$phiHat, d.fit6$sigsqHat, 2*7 - 2*d.fit6$loglikelihood)
-      AIC7.stats = c(d.fit7$muHat, d.fit7$phiHat, d.fit7$sigsqHat, 2*8 - 2*d.fit7$loglikelihood)
-      
-      out <- c(Patient = 1, Seizure = seizure[i_seizure], File = j, Channel = i, 
+      out <- c(patient = 2, seizure = seizure[i_seizure], segment = j, channel = i, 
                Dog.stats,AIC6.stats,AIC7.stats)
-      names(out)  <- c("Patient", "Seizure", "File", "Channel",  
-                       "mean", "sd", "max","min", "median", "ar6_mu",
+      names(out)  <- c("patient", "seizure", "segment", "channel",  "0_quantile","25_quantile", "50_quantile",
+                       "75_quantile", "100_quantile", 
+                       "mean", "sd", paste("pacf_", 1:7, sep = ""), "ar6_mu",
                        paste("ar", 6,"_ar", 1:6, sep = ""),
                        "ar6_sigma2", "ar6_aic", "ar7_mu",
                        paste("ar", 7,"_ar", 1:7, sep = ""),
@@ -812,13 +767,6 @@ patient2_test_121_150_ar6_ar7 <- data.frame(Date=as.Date(character()),
                                            User=character(), 
                                            stringsAsFactors=FALSE) 
 
-n_segment <- c(18, 42, 150)
-seizure <- c("preictal", "interictal", "test")
-type <- c("Dog", "Patient")
-i_type <- c(1:2)
-i_dog <- c(1,2,3,4,5)
-i_patient <- c(1,2)
-
 pm1 <- proc.time()
 for(i_seizure in 3){ # i_seizure <- 1
   for(j in 121:150){
@@ -828,22 +776,21 @@ for(i_seizure in 3){ # i_seizure <- 1
     n_channel <- nrow(dat_mat)
     res <- ldply(1:n_channel, function(i){ # i <- 1
       
-      Dog.stats <- c(mean(dat_mat[i,]),
+      Dog.stats <- c(quantile(dat_mat[i,], probs = c(0, .25, .5, .75, 1)),
                      sd(dat_mat[i,]),
-                     max(dat_mat[i,]),
-                     min(dat_mat[i,]),
-                     median(dat_mat[i,]))
+                     mean(dat_mat[i,]),
+                     pacf(dat_mat[i,], plot = F)$acf[1:7])
       
       d.fit7 <- FitAR(dat_mat[i,], 7)
       d.fit6 <- FitAR(dat_mat[i,], 6)  
+      AIC6.stats = c(d.fit6$muHat, d.fit6$phiHat, d.fit6$sigsqHat, 2*6 - 2*d.fit6$loglikelihood)
+      AIC7.stats = c(d.fit7$muHat, d.fit7$phiHat, d.fit7$sigsqHat, 2*7 - 2*d.fit7$loglikelihood)
       
-      AIC6.stats = c(d.fit6$muHat, d.fit6$phiHat, d.fit6$sigsqHat, 2*7 - 2*d.fit6$loglikelihood)
-      AIC7.stats = c(d.fit7$muHat, d.fit7$phiHat, d.fit7$sigsqHat, 2*8 - 2*d.fit7$loglikelihood)
-      
-      out <- c(Patient = 1, Seizure = seizure[i_seizure], File = j, Channel = i, 
+      out <- c(patient = 2, seizure = seizure[i_seizure], segment = j, channel = i, 
                Dog.stats,AIC6.stats,AIC7.stats)
-      names(out)  <- c("Patient", "Seizure", "File", "Channel",  
-                       "mean", "sd", "max","min", "median", "ar6_mu",
+      names(out)  <- c("patient", "seizure", "segment", "channel",  "0_quantile","25_quantile", "50_quantile",
+                       "75_quantile", "100_quantile", 
+                       "mean", "sd", paste("pacf_", 1:7, sep = ""), "ar6_mu",
                        paste("ar", 6,"_ar", 1:6, sep = ""),
                        "ar6_sigma2", "ar6_aic", "ar7_mu",
                        paste("ar", 7,"_ar", 1:7, sep = ""),
@@ -868,7 +815,7 @@ write.csv(patient2_test_121_150_ar6_ar7, file = "K:/Yet/output/patient2_test_121
 ## Prediction Dog2####
 
 dog2_preictal_1_42_ar6_ar7 <- read.csv("dog2_preictal_1_42_ar6_ar7.csv")
-str(dog2_preictal_1_42_ar6_ar7)
+
 dog2_interictal_1_250_ar6_ar7 <- read.csv("dog2_interictal_1_250_ar6_ar7.csv")
 dog2_interictal_251_500_ar6_ar7 <- read.csv("dog2_interictal_251_500_ar6_ar7.csv")
 dog2_test_1_250_ar6_ar7 <- read.csv("dog2_test_1_250_ar6_ar7.csv")
@@ -884,18 +831,18 @@ d1          <- rbind(dog2_preictal_1_42_ar6_ar7,
                    dog2_test_751_1000_ar6_ar7)
 
 
-dog2_interictal_1_250_ar6_ar7$seizure
 d1$ar6_aic <- d1$ar6_aic +2
 d1$ar7_aic <- d1$ar7_aic +2
 colnames(d1)[1:4] <- c("Dog", "Seizure", "File", "Channel")
-# colnames(d1)
-# d1$Seizure[1:800]
+colnames(d1)
+
 ## transpose so that all rows channels for a single file are on the same row
 d <-cbind(d1[,1:4], d1[,10:11],max = d1[,9], min = d1[, 5], 
            median = d1[, 7], d1[,19:37])
-write.csv(d, file ="dog2_AR6_AR7.csv", row.names = FALSE)
+write.csv(d, file ="dog2_AR6_AR7.csv")
 write.csv(d, file = "K:/Yet/output/dog2_AR6_AR7.csv", row.names = FALSE)
-#d <- read.csv("K:/Yet/output/dog2_AR6_AR7.csv")
+d <- read.csv("K:/Yet/output/dog2_AR6_AR7.csv")
+#d <- read.csv("dog2_AR6_AR7.csv")
 #first melt
 melt.d = melt(d,1:4,5:ncol(d))
 
@@ -915,7 +862,7 @@ dim(train.d)
 train.d$outcome = as.factor(1*!(train.d$Seizure == 'interictal'))
 # train.d$outcome = (1*!(train.d$Seizure == 'interictal'))
 rf.d = train.d[,-c(1:3)]
-dim(rf.d) # train.d$Seizure
+dim(rf.d)
 # Dog 2 has 542 rows and 387 columns. That's a pretty weird shape
 
 samp = sample(1:nrow(rf.d))[1:20]
@@ -927,9 +874,9 @@ rf.d2 = rf.d[-samp,]
 # leave out test set first in rf.d1
 
 # balance data with resampling preictal instances in training set
-imb <- c(sum(rf.d2$outcome==1), sum(rf.d2$outcome==0))
-index <- c(which(rf.d2$outcome==0), 
-           sample(which(rf.d2$outcome==1), imb[2], replace=TRUE)) 
+imb <- c(sum(rf.d$outcome==1), sum(rf.d$outcome==0))
+index <- c(which(rf.d$outcome==0), 
+           sample(which(rf.d$outcome==1), imb[2], replace=TRUE)) 
 rf.d3 = rf.d[index,]
 
 rf.fit1000<-randomForest(outcome ~ ., data=rf.d3, mtry=19, replace=TRUE, 
@@ -952,7 +899,7 @@ write.csv(file='K:/submissions/sept22/Yet_prediction_Dog2.csv',pred.dog2[,c(1:3,
 
 ###Try CV 1 #####
 cv1_dog2 <- laply(1:nrow(rf.d), function(samp){#samp = 1
-  #samp = sample(1:nrow(rf.d))[1:20] rf.d$outcome
+
 rf.d1 = rf.d[samp,]
 rf.d2 = rf.d[-samp,]
 
@@ -971,7 +918,6 @@ rf.fit1000<-randomForest(outcome ~ ., data=rf.d3, mtry=19, replace=TRUE,
                          na.action=na.omit) # 
 
  predict(rf.fit1000, rf.d1,type='prob')[,2]
-predict(rf.fit1000, rf.d1) # rf.d1$Seizure
 #table(rf.d1$outcome,as.numeric(predict(rf.fit1000, rf.d1))-1>0.5)
 }
 )
@@ -1019,13 +965,13 @@ d1          <- rbind(patient2_preictal_1_18_ar6_ar7,
 
 d1$ar6_aic <- d1$ar6_aic +2
 d1$ar7_aic <- d1$ar7_aic +2
-colnames(d1)[1:4] <- c("Patient", "Seizure", "File", "Channel")
+colnames(d1)[1:4] <- c("Dog", "Seizure", "File", "Channel")
 colnames(d1)
 
 ## transpose so that all rows channels for a single file are on the same row
 d <-cbind(d1[,1:4], d1[,10:11],max = d1[,9], min = d1[, 5], 
           median = d1[, 7], d1[,19:37])
-write.csv(d, file ="patient_2_AR6_AR7.csv", row.names = FALSE)
+write.csv(d, file ="patient_2_AR6_AR7.csv")
 write.csv(d, file = "K:/Yet/output/patient2_AR6_AR7.csv", row.names = FALSE)
 
 #first melt
@@ -1036,18 +982,17 @@ melt.d$varname = paste(melt.d$variable,'.Ch',melt.d$Channel,sep='')
 
 
 #then recast the data so that it works again
-cast.d = dcast(melt.d,Patient+Seizure+File ~ varname,value.var = 'value')
+cast.d = dcast(melt.d,Dog+Seizure+File ~ varname,value.var = 'value')
 
 
 test.d = cast.d[which(cast.d$Seizure == 'test'),]
 train.d = cast.d[which(cast.d$Seizure != 'test'),]
 dim(train.d)
-colnames(train.d)
-train.d$Seizure
+
 train.d$outcome = as.factor(1*!(train.d$Seizure == 'interictal'))
 # train.d$outcome = (1*!(train.d$Seizure == 'interictal'))
 rf.d = train.d[,-c(1:3)]
-dim(rf.d) # rf.d$Seizure
+dim(rf.d)
 # Dog 2 has 542 rows and 387 columns. That's a pretty weird shape
 
 samp = sample(1:nrow(rf.d))[1:10]
@@ -1056,39 +1001,13 @@ rf.d2 = rf.d[-samp,]
 dim(rf.d2)
 
 # randomForest
-# leave out test set first in rf.d1 # rf.d$outcome
+# leave out test set first in rf.d1
 
 # balance data with resampling preictal instances in training set
 imb <- c(sum(rf.d2$outcome==1), sum(rf.d2$outcome==0))
 imb
 index1 <- c(which(rf.d2$outcome==0), 
            sample(which(rf.d2$outcome==1), imb[2], replace=TRUE)) 
-index <- sample(index1,1000, replace = TRUE )
-rf.d3 = rf.d[index,]
-
-rf.fit1000<-randomForest(outcome ~ ., data=rf.d3, mtry=19, replace=TRUE, 
-                         sampsize = 500, ntree=1000, importance=TRUE, 
-                         na.action=na.omit) # 
-
-# predict(rf.fit1000, rf.d1)
-table(rf.d1$outcome,as.numeric(predict(rf.fit1000, rf.d1))-1>0.5)
-table(rf.d$outcome,as.numeric(predict(rf.fit1000, rf.d))-1>0.5)
-predict(rf.fit1000, test.d, type = 'prob')
-
-
-pred.patient2 = data.frame(cbind(test.d[,1:3], predict(rf.fit1000,test.d,type='prob')))
-
-names(pred.patient2)[4:5] = c("prob.0","prob.1")
-
-write.csv(file='K:/submissions/sept22/Yet_prediction_Patient2.csv',pred.patient2[,c(1:3,5)],row.names = FALSE)
-
-###Patient2 Use all data to make prediction ####
-# balance data with resampling preictal instances in training set
-
-imb <- c(sum(rf.d$outcome==1), sum(rf.d$outcome==0))
-imb
-index1 <- c(which(rf.d$outcome==0), 
-            sample(which(rf.d$outcome==1), imb[2], replace=TRUE)) 
 index <- sample(index1,1000, replace = TRUE )
 rf.d3 = rf.d[index,]
 
@@ -1174,15 +1093,6 @@ write.csv(Patient1_preictal_1_18_ar6_ar7, file = "K:/Yet/output/Patient1_preicta
 
 #####Patient1_ seizure = 2 interictal 1- 25#####
 ## Patient 1 interictal 50 preictal 18 test 195###
-
-
-n_segment <- c(18, 50, 195)
-seizure <- c("preictal", "interictal", "test")
-type <- c("Dog", "Patient")
-i_type <- c(1:2)
-i_dog <- c(1,2,3,4,5)
-i_patient <- c(1,2)
-
 Patient1_interictal_1_25_ar6_ar7 <- data.frame(Date=as.Date(character()),
                                                File=character(), 
                                                User=character(), 
@@ -1299,7 +1209,7 @@ write.csv(Patient1_interictal_25_50_ar6_ar7, file = "Patient1_interictal_25_50_a
 write.csv(Patient1_interictal_25_50_ar6_ar7, file = "K:/Yet/output/Patient1_interictal_25_50_ar6_ar7.csv", row.names = FALSE)
 
 
-#####Patient1_ seizure = 2 test 1-40#####
+#####Patient1_ seizure = 2 test 1-30#####
 ## Patient 1 interictal 50 preictal 18 test 195###
 
 
@@ -1362,7 +1272,7 @@ write.csv(Patient1_test_1_40_ar6_ar7, file = "Patient1_test_1_40_ar6_ar7.csv", r
 #dog2_preictal_1_42_ar6_ar7 <- dog2_out1
 write.csv(Patient1_test_1_40_ar6_ar7, file = "K:/Yet/output/Patient1_test_1_40_ar6_ar7.csv", row.names = FALSE)
 
-#####Patient1_ seizure = 2 test 41-80#####
+#####Patient1_ seizure = 2 test 31-60#####
 ## Patient 1 interictal 50 preictal 18 test 195###
 
 
@@ -1426,7 +1336,7 @@ write.csv(Patient1_test_41_80_ar6_ar7, file = "Patient1_test_41_80_ar6_ar7.csv",
 write.csv(Patient1_test_41_80_ar6_ar7, file = "K:/Yet/output/Patient1_test_41_80_ar6_ar7.csv", row.names = FALSE)
 
 
-#####Patient1_ seizure = 2 test 81-120#####
+#####Patient1_ seizure = 2 test 61-90#####
 ## Patient 1 interictal 50 preictal 18 test 195###
 
 
@@ -1490,7 +1400,7 @@ write.csv(Patient1_test_81_120_ar6_ar7, file = "Patient1_test_81_120_ar6_ar7.csv
 write.csv(Patient1_test_81_120_ar6_ar7, file = "K:/Yet/output/Patient1_test_81_120_ar6_ar7.csv", row.names = FALSE)
 
 
-#####Patient1_ seizure = 2 test 121-160#####
+#####Patient1_ seizure = 2 test 91-120#####
 ## Patient 1 interictal 50 preictal 18 test 195###
 
 
@@ -1553,7 +1463,7 @@ write.csv(Patient1_test_121_160_ar6_ar7, file = "Patient1_test_121_160_ar6_ar7.c
 #dog2_preictal_1_42_ar6_ar7 <- dog2_out1
 write.csv(Patient1_test_121_160_ar6_ar7, file = "K:/Yet/output/Patient1_test_121_160_ar6_ar7.csv", row.names = FALSE)
 
-#####Patient1_ seizure = 2 test 161-195#####
+#####Patient1_ seizure = 2 test 121-150#####
 ## Patient 1 interictal 50 preictal 18 test 195###
 
 
@@ -1615,3 +1525,15 @@ write.csv(Patient1_test_161_195_ar6_ar7, file = "Patient1_test_161_195_ar6_ar7.c
 
 #dog2_preictal_1_42_ar6_ar7 <- dog2_out1
 write.csv(Patient1_test_161_195_ar6_ar7, file = "K:/Yet/output/Patient1_test_161_195_ar6_ar7.csv", row.names = FALSE)
+
+
+### change mean and sd variables ###
+d <- read.csv("/run/user/1000/gvfs/smb-share:server=researchfiles.iastate.edu,share=las$/STAT/KaggleDataComp/Yet/output/dog2_AR6_AR7.csv")
+
+colnames(d)
+d1 <- d
+d1[,5] <- d[,6]
+d1[,6] <- d[,5]
+colnames(d1)
+head(d1[,5])
+write.csv(d1, file = "/run/user/1000/gvfs/smb-share:server=researchfiles.iastate.edu,share=las$/STAT/KaggleDataComp/Yet/output/dog2_AR6_AR7.csv", row.names = FALSE)
