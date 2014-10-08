@@ -1010,7 +1010,7 @@ index1 <- c(which(rf.d2$outcome==0),
            sample(which(rf.d2$outcome==1), imb[2], replace=TRUE)) 
 index <- sample(index1,1000, replace = TRUE )
 rf.d3 = rf.d[index,]
-?sample
+
 rf.fit1000<-randomForest(outcome ~ ., data=rf.d3, mtry=19, replace=TRUE, 
                          sampsize = 500, ntree=1000, importance=TRUE, 
                          na.action=na.omit) # 
